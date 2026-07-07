@@ -5,3 +5,23 @@
   background-color: #f8f9fa;
   min-height: 100vh;
 }
+/* Button Hover and Disabled States */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Input Focus State */
+input:focus {
+  outline: none !important;
+  border: 1px solid #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Halka sa blue glow premium feel ke liye */
+}

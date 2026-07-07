@@ -10,9 +10,11 @@ const MultiStepForm = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Nayi State: Custom Success Message dikhane ke liye
+  // State to manage the visibility of the success message and store submitted data
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submittedData, setSubmittedData] = useState(null);
 
+  // Security constraint: Sanitize input to prevent XSS attacks
   const sanitizeInput = (input) => {
     return input.replace(/</g, "").replace(/>/g, "");
   };
@@ -26,10 +28,12 @@ const MultiStepForm = () => {
       [name]: sanitizedValue
     }));
     
+    // Clear specific field error when user starts typing
     if (errors[name]) {
       setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
     }
-    // Agar user naya data type karna shuru kare, toh success message hata dein
+    
+    // Hide success message if user starts typing a new entry
     if (showSuccess) {
       setShowSuccess(false);
     }
@@ -48,9 +52,9 @@ const MultiStepForm = () => {
     } else if (currentStep === 2) {
       const accountRegex = /^\d{10}$/;
       if (!formData.accountNumber) {
-        newErrors.accountNumber = "Account Number is required";
+        newErrors.accountNumber = "Account number is required";
       } else if (!accountRegex.test(formData.accountNumber)) {
-        newErrors.accountNumber = "Account Number must be exactly 10 digits";
+        newErrors.accountNumber = "Account number must be exactly 10 digits.";
       }
     }
 
@@ -74,21 +78,30 @@ const MultiStepForm = () => {
       setIsSubmitting(true);
       setShowSuccess(false); 
       
+      // Simulating a slow network connection (3G) as per requirements
       setTimeout(() => {
         console.log("[Analytics] User interacted with Complex Validation Hooks");
         
         setIsSubmitting(false); 
-        setShowSuccess(true); // Alert ki jagah green message true kiya
+        setShowSuccess(true);
         
+        // Store data for displaying in the success message
+        setSubmittedData({ ...formData }); 
+        
+        // Reset form fields and navigate back to step 1
         setFormData({ username: '', accountNumber: '' });
         setCurrentStep(1);
 
-        // Optional: 5 second baad success message apne aap gayab ho jayega
-        setTimeout(() => setShowSuccess(false), 5000);
+        // Auto-hide the success message after 7 seconds
+        setTimeout(() => {
+            setShowSuccess(false);
+            setSubmittedData(null);
+        }, 7000);
       }, 2500);
     }
   };
 
+  // Dynamic styling for input fields based on validation errors
   const getInputStyle = (fieldName) => ({
     display: 'block', 
     width: '100%', 
@@ -96,33 +109,62 @@ const MultiStepForm = () => {
     padding: '16px', 
     marginTop: '8px', 
     border: errors[fieldName] ? '2px solid #ef4444' : '1px solid #d1d5db',
-    borderRadius: '6px', 
-    outline: 'none',
+    borderRadius: '8px', 
     fontSize: '16px',
     backgroundColor: '#f9fafb'
   });
 
+  // Base styles for buttons to ensure consistent height and padding
+  const buttonBaseStyle = {
+    padding: '16px 32px',
+    borderRadius: '8px',
+    fontWeight: '600',
+    fontSize: '16px',
+    boxSizing: 'border-box',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '56px', // Fixed height to prevent layout shifts
+  };
+
   return (
-    // Main Wrapper jisme sab kuch center rahega
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '64px' }}>
       
-      {/* 1. Centered Heading */}
       <h1 style={{ marginBottom: '24px', color: '#111827', textAlign: 'center', fontSize: '32px' }}>
         Complex Validation Hooks
       </h1>
 
-      {/* 2. Card with max-width: 500px and width: 100% */}
       <div style={{ 
         backgroundColor: '#ffffff', 
         padding: '32px', 
         border: '1px solid #e5e7eb', 
         borderRadius: '12px', 
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05)', 
-        maxWidth: '500px', 
+        maxWidth: '450px', 
         width: '100%',
         boxSizing: 'border-box'
       }}>
-        <h2 style={{ marginBottom: '32px', color: '#111827', fontSize: '24px' }}>Step {currentStep} of 2</h2>
+        
+        {/* Step Progress Indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', gap: '8px' }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '50%',
+            backgroundColor: currentStep >= 1 ? '#2563eb' : '#e5e7eb',
+            color: currentStep >= 1 ? '#fff' : '#6b7280',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+          }}>1</div>
+          <div style={{ height: '3px', width: '40px', backgroundColor: currentStep === 2 ? '#2563eb' : '#e5e7eb', borderRadius: '2px' }}></div>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '50%',
+            backgroundColor: currentStep === 2 ? '#2563eb' : '#e5e7eb',
+            color: currentStep === 2 ? '#fff' : '#6b7280',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
+          }}>2</div>
+        </div>
+
+        <h2 style={{ marginBottom: '24px', color: '#111827', fontSize: '24px', textAlign: 'center' }}>
+          Step {currentStep} of 2
+        </h2>
         
         {currentStep === 1 && (
           <div>
@@ -135,7 +177,6 @@ const MultiStepForm = () => {
                 onChange={handleChange} 
                 style={getInputStyle('username')}
                 aria-label="Username input" 
-                // 3. Simple Placeholder Added
                 placeholder="Enter username"
               />
               {errors.username && <span style={{ color: '#ef4444', fontSize: '14px', marginTop: '8px', display: 'block' }}>{errors.username}</span>}
@@ -143,16 +184,12 @@ const MultiStepForm = () => {
             <button 
               onClick={nextStep} 
               style={{ 
-                padding: '16px 32px', 
+                ...buttonBaseStyle,
                 backgroundColor: '#1f2937', 
                 color: '#ffffff', 
                 border: 'none', 
-                borderRadius: '6px', 
-                cursor: 'pointer', 
                 marginTop: '16px',
                 width: '100%', 
-                fontWeight: '600',
-                fontSize: '16px'
               }}
               aria-label="Proceed to the next step"
             >
@@ -181,16 +218,12 @@ const MultiStepForm = () => {
                 onClick={prevStep} 
                 disabled={isSubmitting}
                 style={{ 
+                  ...buttonBaseStyle,
                   flex: 1, 
-                  padding: '16px 32px', 
                   backgroundColor: '#f3f4f6', 
                   color: '#374151', 
                   border: '1px solid #d1d5db', 
-                  borderRadius: '6px',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer', 
                   opacity: isSubmitting ? 0.5 : 1,
-                  fontWeight: '600',
-                  fontSize: '16px'
                 }}
                 aria-label="Navigate back to the previous step"
               >
@@ -200,43 +233,45 @@ const MultiStepForm = () => {
                 onClick={handleSubmit} 
                 disabled={isSubmitting}
                 style={{ 
+                  ...buttonBaseStyle,
                   flex: 1, 
-                  padding: '16px 32px', 
                   backgroundColor: '#1f2937', 
                   color: '#ffffff', 
                   border: 'none', 
-                  borderRadius: '6px',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer', 
                   opacity: isSubmitting ? 0.7 : 1,
-                  fontWeight: '600',
-                  fontSize: '16px'
                 }}
                 aria-label="Submit validation form"
               >
-                {isSubmitting ? 'Processing (3G)...' : 'Submit'}
+                {isSubmitting ? 'Processing...' : 'Submit'}
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* 4. Beautiful Green Success Message */}
-      {showSuccess && (
+      {/* Advanced Success Message Rendering */}
+      {showSuccess && submittedData && (
         <div style={{
           marginTop: '24px',
-          padding: '16px',
+          padding: '24px',
           backgroundColor: '#d1fae5',
           color: '#065f46',
-          borderRadius: '6px',
+          borderRadius: '8px',
           border: '1px solid #34d399',
           width: '100%',
-          maxWidth: '500px',
-          textAlign: 'center',
-          fontWeight: '600',
+          maxWidth: '450px',
+          textAlign: 'left',
           boxSizing: 'border-box',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
         }}>
-          ✅ Form submitted successfully!
+          <div style={{ fontWeight: '600', marginBottom: '16px', textAlign: 'center', fontSize: '18px' }}>
+            ✔ Form Submitted Successfully
+          </div>
+          <div style={{ fontSize: '16px', lineHeight: '1.8' }}>
+            <strong>Username :</strong> {submittedData.username} <br />
+            {/* Account number masking: 8 asterisks followed by the last 2 digits */}
+            <strong>Account :</strong> {"*".repeat(8) + submittedData.accountNumber.slice(-2)}
+          </div>
         </div>
       )}
     </div>
