@@ -1,6 +1,6 @@
 # 🚀 Complex Validation Hooks
 
-A production-ready, multi-step React form featuring custom validation hooks, async submission handling, and a premium minimalist UI. 
+A React multi-step form built with custom hooks, regex-based validation, asynchronous form submission, and a clean responsive UI. 
 
 ### 🔗 Project Links
 * **Live Demo:** [https://complex-validation-app.vercel.app](https://complex-validation-app.vercel.app)
@@ -38,4 +38,4 @@ A production-ready, multi-step React form featuring custom validation hooks, asy
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/btwitsnaushad/complex-validation-app.git](https://github.com/btwitsnaushad/complex-validation-app.git)
+git clone https://github.com/btwitsnaushad/complex-validation-app.git
