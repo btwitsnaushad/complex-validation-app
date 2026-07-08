@@ -1,16 +1,41 @@
-# React + Vite
+# 🚀 Complex Validation Hooks
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-ready, multi-step React form featuring custom validation hooks, async submission handling, and a premium minimalist UI. 
 
-Currently, two official plugins are available:
+### 🔗 Project Links
+* **Live Demo:** [https://complex-validation-app.vercel.app](https://complex-validation-app.vercel.app)
+* **GitHub Repository:** [https://github.com/btwitsnaushad/complex-validation-app](https://github.com/btwitsnaushad/complex-validation-app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## ✨ Features & Implementation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Core Functionality (The "Happy Path")
+* **Multi-Step Architecture:** Seamless navigation between form steps with state preservation.
+* **Real-time Custom Validation:** Strict Regex-based validation for usernames (alphanumeric, 3-15 chars) and account numbers (exactly 10 digits).
+* **Telemetry Simulation:** Console logging integrated for interaction tracking.
 
-## Expanding the ESLint configuration
+### 2. Edge Case Handling (The "Unhappy Path")
+* **Async Submission & 3G Simulation:** Handles slow network conditions flawlessly. Form inputs and buttons are locked/disabled during the 2.5s simulated processing time to prevent duplicate submissions.
+* **Error States:** Instant red highlighting and descriptive error messages for malformed data.
+* **Enterprise Security:** Built-in XSS input sanitization to prevent malicious script injection.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 3. Premium UI/UX & Accessibility
+* **Modern Design System:** Monochromatic green and white palette, floating card design, dynamic input focus rings, and smooth page-load entrance animations.
+* **Zero CSS Dependencies:** Completely styled using pure CSS and component-scoped styling.
+* **Accessibility (a11y):** ARIA labels integrated across all interactive elements for screen reader support.
+
+---
+
+## 🛠️ Tech Stack
+* **Framework:** React.js + Vite
+* **State Management:** React Hooks (`useState`, `useEffect`)
+* **Deployment:** Vercel
+
+---
+
+## 📦 How to Run Locally
+
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/btwitsnaushad/complex-validation-app.git](https://github.com/btwitsnaushad/complex-validation-app.git)
