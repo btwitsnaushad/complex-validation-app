@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const MultiStepForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -10,11 +10,15 @@ const MultiStepForm = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // State to manage the visibility of the success message and store submitted data
   const [showSuccess, setShowSuccess] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+  const [focusedField, setFocusedField] = useState(null);
+  const [animate, setAnimate] = useState(false);
 
-  // Security constraint: Sanitize input to prevent XSS attacks
+  useEffect(() => {
+    setAnimate(true);
+  }, []);
+
   const sanitizeInput = (input) => {
     return input.replace(/</g, "").replace(/>/g, "");
   };
@@ -28,12 +32,10 @@ const MultiStepForm = () => {
       [name]: sanitizedValue
     }));
     
-    // Clear specific field error when user starts typing
     if (errors[name]) {
       setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
     }
     
-    // Hide success message if user starts typing a new entry
     if (showSuccess) {
       setShowSuccess(false);
     }
@@ -78,202 +80,329 @@ const MultiStepForm = () => {
       setIsSubmitting(true);
       setShowSuccess(false); 
       
-      // Simulating a slow network connection (3G) as per requirements
       setTimeout(() => {
         console.log("[Analytics] User interacted with Complex Validation Hooks");
         
         setIsSubmitting(false); 
         setShowSuccess(true);
-        
-        // Store data for displaying in the success message
         setSubmittedData({ ...formData }); 
-        
-        // Reset form fields and navigate back to step 1
-        setFormData({ username: '', accountNumber: '' });
-        setCurrentStep(1);
-
-        // Auto-hide the success message after 7 seconds
-        setTimeout(() => {
-            setShowSuccess(false);
-            setSubmittedData(null);
-        }, 7000);
       }, 2500);
     }
   };
 
-  // Dynamic styling for input fields based on validation errors
-  const getInputStyle = (fieldName) => ({
-    display: 'block', 
-    width: '100%', 
-    boxSizing: 'border-box', 
-    padding: '16px', 
-    marginTop: '8px', 
-    border: errors[fieldName] ? '2px solid #ef4444' : '1px solid #d1d5db',
-    borderRadius: '8px', 
-    fontSize: '16px',
-    backgroundColor: '#f9fafb'
-  });
+  const handleReset = () => {
+    setFormData({ username: '', accountNumber: '' });
+    setCurrentStep(1);
+    setShowSuccess(false);
+    setSubmittedData(null);
+  };
 
-  // Base styles for buttons to ensure consistent height and padding
+  // Input styling updated with the new soft glow shadow
+  const getInputStyle = (fieldName) => {
+    const hasError = errors[fieldName];
+    const isFocused = focusedField === fieldName;
+    const isDisabled = isSubmitting;
+
+    return {
+      display: 'block', 
+      width: '100%', 
+      boxSizing: 'border-box', 
+      padding: '0 14px', 
+      height: '48px', 
+      marginTop: '8px', 
+      border: hasError ? '2px solid #ef4444' : isFocused ? '1px solid #3b82f6' : '1px solid #cbd5e1',
+      // Focus shadow updated to requested exact rgba values
+      boxShadow: (isFocused && !hasError && !isDisabled) ? '0 0 0 4px rgba(59,130,246,0.15)' : 'none',
+      outline: 'none', 
+      borderRadius: '8px', 
+      fontSize: '16px',
+      color: '#0f172a',
+      backgroundColor: isDisabled ? '#f3f4f6' : '#ffffff', 
+      cursor: isDisabled ? 'not-allowed' : 'text',
+      transition: 'all 0.25s ease'
+    };
+  };
+
+  // Button base styles updated with 0.25s transition
   const buttonBaseStyle = {
-    padding: '16px 32px',
-    borderRadius: '8px',
+    padding: '0 32px',
+    borderRadius: '12px',
     fontWeight: '600',
     fontSize: '16px',
     boxSizing: 'border-box',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '56px', // Fixed height to prevent layout shifts
+    height: '48px', 
+    transition: 'all 0.25s ease', 
+    border: 'none',
+    cursor: 'pointer'
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '64px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       
-      <h1 style={{ marginBottom: '24px', color: '#111827', textAlign: 'center', fontSize: '32px' }}>
-        Complex Validation Hooks
-      </h1>
-
       <div style={{ 
-        backgroundColor: '#ffffff', 
-        padding: '32px', 
-        border: '1px solid #e5e7eb', 
-        borderRadius: '12px', 
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05)', 
-        maxWidth: '450px', 
-        width: '100%',
-        boxSizing: 'border-box'
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        paddingTop: '40px', 
+        paddingBottom: '64px', 
+        paddingLeft: '16px', 
+        paddingRight: '16px' 
       }}>
         
-        {/* Step Progress Indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', gap: '8px' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '50%',
-            backgroundColor: currentStep >= 1 ? '#2563eb' : '#e5e7eb',
-            color: currentStep >= 1 ? '#fff' : '#6b7280',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-          }}>1</div>
-          <div style={{ height: '3px', width: '40px', backgroundColor: currentStep === 2 ? '#2563eb' : '#e5e7eb', borderRadius: '2px' }}></div>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '50%',
-            backgroundColor: currentStep === 2 ? '#2563eb' : '#e5e7eb',
-            color: currentStep === 2 ? '#fff' : '#6b7280',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-          }}>2</div>
-        </div>
-
-        <h2 style={{ marginBottom: '24px', color: '#111827', fontSize: '24px', textAlign: 'center' }}>
-          Step {currentStep} of 2
-        </h2>
+        <h1 style={{ marginBottom: '12px', color: '#0f172a', textAlign: 'center', fontSize: '32px', fontWeight: '700', letterSpacing: '-0.5px' }}>
+          Complex Validation Hooks
+        </h1>
         
-        {currentStep === 1 && (
-          <div>
-            <label style={{ display: 'block', marginBottom: '16px', fontWeight: '600', color: '#374151' }}>
-              Username:
-              <input 
-                type="text" 
-                name="username" 
-                value={formData.username} 
-                onChange={handleChange} 
-                style={getInputStyle('username')}
-                aria-label="Username input" 
-                placeholder="Enter username"
-              />
-              {errors.username && <span style={{ color: '#ef4444', fontSize: '14px', marginTop: '8px', display: 'block' }}>{errors.username}</span>}
-            </label>
-            <button 
-              onClick={nextStep} 
-              style={{ 
+        <p style={{ marginBottom: '32px', color: '#64748b', textAlign: 'center', fontSize: '16px', maxWidth: '300px', lineHeight: '1.6' }}>
+          A simple multi-step form with custom React hooks, real-time validation and async submission.
+        </p>
+
+        {!showSuccess && (
+          <div style={{ 
+            backgroundColor: '#ffffff', 
+            padding: '32px', 
+            border: '1px solid #eef2f7', 
+            borderRadius: '18px', 
+            // Shadow updated to be softer and wider
+            boxShadow: '0 20px 50px rgba(15,23,42,0.12)', 
+            maxWidth: '430px', 
+            width: '100%',
+            boxSizing: 'border-box',
+            opacity: animate ? 1 : 0,
+            transform: animate ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.5s ease, transform 0.5s ease, box-shadow 0.25s ease'
+          }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', gap: '8px' }}>
+              <div style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                backgroundColor: currentStep >= 1 ? '#3b82f6' : '#f1f5f9',
+                color: currentStep >= 1 ? '#ffffff' : '#64748b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold',
+                transition: 'all 0.3s ease'
+              }}>1</div>
+              
+              <div style={{ 
+                height: '4px', width: '40px', 
+                backgroundColor: currentStep === 2 ? '#3b82f6' : '#e2e8f0', 
+                borderRadius: '2px', 
+                transition: 'all 0.3s ease' 
+              }}></div>
+              
+              <div style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                backgroundColor: currentStep === 2 ? '#3b82f6' : '#f1f5f9',
+                color: currentStep === 2 ? '#ffffff' : '#64748b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold',
+                transition: 'all 0.3s ease'
+              }}>2</div>
+            </div>
+            
+            {currentStep === 1 && (
+              <div>
+                <label style={{ display: 'block', marginBottom: '16px', fontWeight: '600', color: '#0f172a' }}>
+                  Username
+                  <input 
+                    type="text" 
+                    name="username" 
+                    value={formData.username} 
+                    onChange={handleChange} 
+                    onFocus={() => setFocusedField('username')} 
+                    onBlur={() => setFocusedField(null)} 
+                    style={getInputStyle('username')}
+                    aria-label="Username input" 
+                    placeholder="Enter username"
+                    disabled={isSubmitting}
+                  />
+                  {errors.username && <span style={{ color: '#ef4444', fontSize: '13px', marginTop: '6px', display: 'block' }}>{errors.username}</span>}
+                </label>
+                <button 
+                  onClick={nextStep} 
+                  disabled={isSubmitting}
+                  style={{ 
+                    ...buttonBaseStyle,
+                    backgroundColor: '#0f172a', 
+                    color: '#ffffff', 
+                    marginTop: '24px',
+                    width: '100%', 
+                    opacity: isSubmitting ? 0.7 : 1,
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  }}
+                  aria-label="Proceed to the next step"
+                  onMouseOver={(e) => { 
+                    if(!isSubmitting) { 
+                      e.currentTarget.style.backgroundColor = '#111827'; 
+                      e.currentTarget.style.transform = 'translateY(-2px)'; 
+                    } 
+                  }}
+                  onMouseOut={(e) => { 
+                    if(!isSubmitting) { 
+                      e.currentTarget.style.backgroundColor = '#0f172a'; 
+                      e.currentTarget.style.transform = 'translateY(0)'; 
+                    } 
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div>
+                 <label style={{ display: 'block', marginBottom: '16px', fontWeight: '600', color: '#0f172a' }}>
+                  Account Number
+                  <input 
+                    type="text" 
+                    name="accountNumber" 
+                    value={formData.accountNumber} 
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('accountNumber')} 
+                    onBlur={() => setFocusedField(null)} 
+                    style={getInputStyle('accountNumber')}
+                    aria-label="Account Number input"
+                    placeholder="Enter 10 digit account number"
+                    disabled={isSubmitting} 
+                  />
+                  {errors.accountNumber && <span style={{ color: '#ef4444', fontSize: '13px', marginTop: '6px', display: 'block' }}>{errors.accountNumber}</span>}
+                </label>
+                <div style={{ marginTop: '24px', display: 'flex', gap: '16px' }}>
+                  
+                  <button 
+                    onClick={prevStep} 
+                    disabled={isSubmitting}
+                    style={{ 
+                      ...buttonBaseStyle,
+                      flex: 1, 
+                      backgroundColor: '#ffffff', 
+                      color: '#0f172a', 
+                      border: '1px solid #94a3b8', 
+                      opacity: isSubmitting ? 0.7 : 1,
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    }}
+                    aria-label="Navigate back to the previous step"
+                    onMouseOver={(e) => { 
+                      if(!isSubmitting) { 
+                        e.currentTarget.style.backgroundColor = '#f1f5f9'; 
+                        e.currentTarget.style.transform = 'translateY(-2px)'; 
+                      } 
+                    }}
+                    onMouseOut={(e) => { 
+                      if(!isSubmitting) { 
+                        e.currentTarget.style.backgroundColor = '#ffffff'; 
+                        e.currentTarget.style.transform = 'translateY(0)'; 
+                      } 
+                    }}
+                  >
+                    Back
+                  </button>
+                  
+                  <button 
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                    style={{ 
+                      ...buttonBaseStyle,
+                      flex: 1, 
+                      backgroundColor: '#0f172a', 
+                      color: '#ffffff', 
+                      opacity: isSubmitting ? 0.7 : 1,
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    }}
+                    aria-label="Submit validation form"
+                    onMouseOver={(e) => { 
+                      if(!isSubmitting) { 
+                        e.currentTarget.style.backgroundColor = '#111827'; 
+                        e.currentTarget.style.transform = 'translateY(-2px)'; 
+                      } 
+                    }}
+                    onMouseOut={(e) => { 
+                      if(!isSubmitting) { 
+                        e.currentTarget.style.backgroundColor = '#0f172a'; 
+                        e.currentTarget.style.transform = 'translateY(0)'; 
+                      } 
+                    }}
+                  >
+                    {isSubmitting ? 'Processing...' : 'Submit'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Updated Premium Success Card */}
+        {showSuccess && submittedData && (
+          <div style={{
+            marginTop: '20px', 
+            padding: '40px 32px', 
+            backgroundColor: '#f0fdf4', // Halka green background applied to the whole card
+            borderRadius: '18px', 
+            border: '1px solid #bbf7d0',
+            width: '100%',
+            maxWidth: '430px',
+            boxSizing: 'border-box',
+            boxShadow: '0 20px 50px rgba(15,23,42,0.12)', 
+            transition: 'all 0.3s ease',
+            textAlign: 'center',
+            opacity: animate ? 1 : 0,
+            transform: animate ? 'translateY(0)' : 'translateY(16px)'
+          }}>
+            
+            {/* Green Circle Icon */}
+            <div style={{ 
+              width: '64px', 
+              height: '64px', 
+              backgroundColor: '#dcfce7', 
+              borderRadius: '50%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              margin: '0 auto 24px auto' 
+            }}>
+              <span style={{ fontSize: '32px', color: '#16a34a', lineHeight: '1' }}>✔</span>
+            </div>
+            
+            {/* Bada Success Text */}
+            <h2 style={{ 
+              fontWeight: '700', 
+              margin: '0 0 12px 0', 
+              color: '#166534', 
+              fontSize: '28px' 
+            }}>
+              Success
+            </h2>
+            
+            <p style={{ margin: '0 0 32px 0', fontSize: '16px', color: '#15803d', lineHeight: '1.6' }}>
+              Your information has been submitted successfully.
+            </p>
+            
+            <button
+              onClick={handleReset}
+              style={{
                 ...buttonBaseStyle,
-                backgroundColor: '#1f2937', 
-                color: '#ffffff', 
-                border: 'none', 
-                marginTop: '16px',
-                width: '100%', 
+                width: '100%',
+                backgroundColor: '#166534', 
+                color: '#ffffff',
+                border: '1px solid #14532d'
               }}
-              aria-label="Proceed to the next step"
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#14532d';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#166534';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              Next
+              Start New Form
             </button>
           </div>
         )}
-
-        {currentStep === 2 && (
-          <div>
-             <label style={{ display: 'block', marginBottom: '16px', fontWeight: '600', color: '#374151' }}>
-              Account Number (10 Digits):
-              <input 
-                type="text" 
-                name="accountNumber" 
-                value={formData.accountNumber} 
-                onChange={handleChange} 
-                style={getInputStyle('accountNumber')}
-                aria-label="Account Number input"
-                placeholder="e.g. 1234567890"
-              />
-              {errors.accountNumber && <span style={{ color: '#ef4444', fontSize: '14px', marginTop: '8px', display: 'block' }}>{errors.accountNumber}</span>}
-            </label>
-            <div style={{ marginTop: '32px', display: 'flex', gap: '16px' }}>
-              <button 
-                onClick={prevStep} 
-                disabled={isSubmitting}
-                style={{ 
-                  ...buttonBaseStyle,
-                  flex: 1, 
-                  backgroundColor: '#f3f4f6', 
-                  color: '#374151', 
-                  border: '1px solid #d1d5db', 
-                  opacity: isSubmitting ? 0.5 : 1,
-                }}
-                aria-label="Navigate back to the previous step"
-              >
-                Back
-              </button>
-              <button 
-                onClick={handleSubmit} 
-                disabled={isSubmitting}
-                style={{ 
-                  ...buttonBaseStyle,
-                  flex: 1, 
-                  backgroundColor: '#1f2937', 
-                  color: '#ffffff', 
-                  border: 'none', 
-                  opacity: isSubmitting ? 0.7 : 1,
-                }}
-                aria-label="Submit validation form"
-              >
-                {isSubmitting ? 'Processing...' : 'Submit'}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Advanced Success Message Rendering */}
-      {showSuccess && submittedData && (
-        <div style={{
-          marginTop: '24px',
-          padding: '24px',
-          backgroundColor: '#d1fae5',
-          color: '#065f46',
-          borderRadius: '8px',
-          border: '1px solid #34d399',
-          width: '100%',
-          maxWidth: '450px',
-          textAlign: 'left',
-          boxSizing: 'border-box',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
-        }}>
-          <div style={{ fontWeight: '600', marginBottom: '16px', textAlign: 'center', fontSize: '18px' }}>
-            ✔ Form Submitted Successfully
-          </div>
-          <div style={{ fontSize: '16px', lineHeight: '1.8' }}>
-            <strong>Username :</strong> {submittedData.username} <br />
-            {/* Account number masking: 8 asterisks followed by the last 2 digits */}
-            <strong>Account :</strong> {"*".repeat(8) + submittedData.accountNumber.slice(-2)}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
