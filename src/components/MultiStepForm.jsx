@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const MultiStepForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -16,7 +16,11 @@ const MultiStepForm = () => {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    setAnimate(true);
+    const animationTimer = setTimeout(() => {
+      setAnimate(true);
+    }, 50);
+
+    return () => clearTimeout(animationTimer);
   }, []);
 
   const sanitizeInput = (input) => {
